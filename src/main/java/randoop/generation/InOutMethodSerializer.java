@@ -50,19 +50,20 @@ public class InOutMethodSerializer implements IEventListener {
 
 	@Override
 	public void generationStepPre() { 
-		inOoss = new ArrayList<>();
-		outOoss = new ArrayList<>();
+
 	}
 
 	@Override
 	public void generationStepPost(ExecutableSequence s) {
+		if (s == null)
+			return;
+		
 		TypedOperation lastOp = s.sequence.getStatement(s.sequence.size() - 1).getOperation();
 		if (!(lastOp instanceof TypedClassOperation)) 
 			return;
 		TypedClassOperation typedLastOp = (TypedClassOperation) lastOp;
 		if (!methodMatcher.matches(typedLastOp)) 
 			return;
-
 		
 		List<Object> inputs = inOutCollector.getInputs();
 		List<Object> outputs = inOutCollector.getOutputs();
@@ -70,8 +71,8 @@ public class InOutMethodSerializer implements IEventListener {
 			operation = typedLastOp;
 			inObjs = inputs.size();
 			outObjs = outputs.size();
-			createStream(inObjs, inOoss, "in");
-			createStream(outObjs, outOoss, "out");
+			inOoss = createStream(inObjs, "in");
+			outOoss = createStream(outObjs, "out");
 			first = false;
 		}
 		else 
@@ -113,7 +114,8 @@ public class InOutMethodSerializer implements IEventListener {
 	}
 	
 	
-	private void createStream(int n, List<ObjectOutputStream> loos, String inOut) {
+	private List<ObjectOutputStream> createStream(int n, String inOut) {
+		List<ObjectOutputStream> loos = new ArrayList<>();
 		for (int k = 0; k < n; k++) {
 			String currFile = outputFolder + "/" + inOut + String.valueOf(k) + ".xml";
 			try {
@@ -123,6 +125,7 @@ public class InOutMethodSerializer implements IEventListener {
 				throw new Error("Cannot create serial file: " + currFile);
 			}
 		}
+		return loos;
 	}
 	
 	private void writeObjects(List<Object> objs, List<ObjectOutputStream> loos) {

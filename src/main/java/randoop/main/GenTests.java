@@ -449,10 +449,6 @@ public class GenTests extends GenInputsAbstract {
             listenerMgr,
             classesUnderTest);
     
-    if (GenInputsAbstract.serialize_method != null) 
-    	explorer.setExecutionVisitor(inOutCollector);
-
-
     // log setup.
     operationModel.log();
     if (GenInputsAbstract.operation_history_log != null) {
@@ -522,6 +518,10 @@ public class GenTests extends GenInputsAbstract {
         }
       }
     }
+    
+    if (GenInputsAbstract.serialize_method != null) 
+    	visitors.add(inOutCollector);
+    
     explorer.setExecutionVisitor(visitors);
 
     // Diagnostic output
