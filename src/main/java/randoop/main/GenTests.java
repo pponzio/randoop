@@ -5,6 +5,9 @@ import static randoop.reflection.AccessibilityPredicate.IS_PUBLIC;
 import com.github.javaparser.ParseException;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.stmt.BlockStmt;
+import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.persistence.XmlArrayList;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -43,6 +46,7 @@ import org.plumelib.util.StringsPlume;
 import org.plumelib.util.UtilPlume;
 import randoop.ExecutionVisitor;
 import randoop.Globals;
+import randoop.InOutObjectsCollector;
 import randoop.MethodReplacements;
 import randoop.condition.RandoopSpecificationError;
 import randoop.condition.SpecificationCollection;
@@ -50,6 +54,7 @@ import randoop.execution.TestEnvironment;
 import randoop.generation.AbstractGenerator;
 import randoop.generation.ComponentManager;
 import randoop.generation.ForwardGenerator;
+import randoop.generation.InOutMethodSerializer;
 import randoop.generation.RandoopGenerationError;
 import randoop.generation.RandoopListenerManager;
 import randoop.generation.SeedSequences;
@@ -422,6 +427,16 @@ public class GenTests extends GenInputsAbstract {
       sideEffectFreeMethods.addAll(sideEffectFreeMethodsByType.getValues(keyType));
     }
 
+   	InOutObjectsCollector inOutCollector = null;
+    if (GenInputsAbstract.serialize_method != null) {
+    	XStream xstream = new XStream();
+    	inOutCollector = new InOutObjectsCollector(xstream);
+    	listenerMgr.addListener(new InOutMethodSerializer(xstream, 
+    			GenInputsAbstract.serialize_method, 
+    			GenInputsAbstract.serialize_folder, 
+    			inOutCollector));
+    }
+    
     /*
      * Create the generator for this session.
      */
@@ -433,6 +448,10 @@ public class GenTests extends GenInputsAbstract {
             componentMgr,
             listenerMgr,
             classesUnderTest);
+    
+    if (GenInputsAbstract.serialize_method != null) 
+    	explorer.setExecutionVisitor(inOutCollector);
+
 
     // log setup.
     operationModel.log();

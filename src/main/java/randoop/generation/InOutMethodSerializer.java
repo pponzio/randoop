@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 
 import com.thoughtworks.xstream.XStream;
 
-import randoop.InOutCollectorVisitor;
+import randoop.InOutObjectsCollector;
 import randoop.operation.TypedClassOperation;
 import randoop.operation.TypedOperation;
 import randoop.reflection.SingleMethodMatcher;
@@ -24,12 +24,13 @@ public class InOutMethodSerializer implements IEventListener {
 	private XStream xstream;
 	private List<ObjectOutputStream> inOoss;
 	private List<ObjectOutputStream> outOoss;
-	private InOutCollectorVisitor inOutCollector;
+	private InOutObjectsCollector inOutCollector;
 	private int inObjs = -1;
 	private int outObjs = -1;
 	private boolean first = true;
 
-	public InOutMethodSerializer(Pattern method, String outputFolder, InOutCollectorVisitor inOutCollector) {
+	public InOutMethodSerializer(XStream xstream, Pattern method, String outputFolder, InOutObjectsCollector inOutCollector) {
+		this.xstream = xstream;
 		this.methodPattern = method;
 		this.methodMatcher = new SingleMethodMatcher(methodPattern);
 		this.outputFolder = outputFolder;
@@ -38,7 +39,7 @@ public class InOutMethodSerializer implements IEventListener {
 	
 	@Override
 	public void explorationStart() { 
-		xstream = new XStream();
+
 	}
 
 	@Override

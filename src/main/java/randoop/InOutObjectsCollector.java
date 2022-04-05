@@ -7,13 +7,13 @@ import com.thoughtworks.xstream.XStream;
 
 import randoop.sequence.ExecutableSequence;
 
-public final class InOutCollectorVisitor implements ExecutionVisitor {
+public final class InOutObjectsCollector implements ExecutionVisitor {
 
 	private XStream xstream;
 	private List<Object> inputs;
 	private List<Object> outputs;
 	
-	public InOutCollectorVisitor(XStream xstream) {
+	public InOutObjectsCollector(XStream xstream) {
 		this.xstream = xstream;
 	}
 

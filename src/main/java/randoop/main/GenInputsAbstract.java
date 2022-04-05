@@ -54,6 +54,12 @@ public abstract class GenInputsAbstract extends CommandHandler {
   @Option("List methods and exit Randoop")
   public static boolean list_methods_and_exit = false;
   
+  @Option("Serialize all input/output tuples for the method matching this pattern. Warning: The pattern must match a single method!")
+  public static Pattern serialize_method = null;
+
+  @Option("Serialize input/output tuples for the method matching serialize_method to this folder")
+  public static String serialize_folder = "./";
+  
   /**
    * Treat every class in the given jar file as a class to test. The jarfile must be on the
    * classpath.
