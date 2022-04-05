@@ -49,6 +49,11 @@ public abstract class GenInputsAbstract extends CommandHandler {
     super(command, pitch, commandGrammar, where, summary, notes, input, output, example, options);
   }
 
+  
+  @OptionGroup("Serialization options")
+  @Option("List methods and exit Randoop")
+  public static boolean list_methods_and_exit = false;
+  
   /**
    * Treat every class in the given jar file as a class to test. The jarfile must be on the
    * classpath.

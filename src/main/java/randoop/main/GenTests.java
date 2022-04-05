@@ -384,6 +384,18 @@ public class GenTests extends GenInputsAbstract {
     }
     if (GenInputsAbstract.progressdisplay) {
       System.out.println("PUBLIC MEMBERS=" + operations.size());
+      
+      if (GenInputsAbstract.list_methods_and_exit) {
+    	System.out.println("\nUSING METHODS:");
+    	for (TypedOperation op: operations) {
+    	  if (op instanceof TypedClassOperation) {
+    	    TypedClassOperation typedop = (TypedClassOperation) op;
+    	    System.out.println(typedop.getRawSignature().toString());
+    	  } 
+    	}
+    	System.exit(0);
+      }
+
     }
 
     /*
