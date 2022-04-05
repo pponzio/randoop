@@ -66,6 +66,12 @@ public class OmitMethodsPredicate {
   public OmitMethodsPredicate(List<Pattern> omitPatterns) {
     this.omitPatterns = new ArrayList<>(omitPatterns);
   }
+  
+  public OmitMethodsPredicate(Pattern omitPattern) {
+	List<Pattern> singlePatternList = new ArrayList<>();
+	singlePatternList.add(omitPattern);
+    this.omitPatterns = singlePatternList;
+  } 
 
   /**
    * Indicates whether an omit pattern matches the raw signature of the method, either in the

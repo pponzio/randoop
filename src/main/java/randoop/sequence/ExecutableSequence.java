@@ -349,6 +349,12 @@ public class ExecutableSequence {
       exectime = System.nanoTime() - startTime;
     }
   }
+  
+  public Object[] getRuntimeInputs(int i) {
+      List<Variable> inputs = sequence.getInputs(i);
+      Object[] inputVariables = getRuntimeInputs(inputs);
+      return inputVariables;
+  }
 
   public Object[] getRuntimeInputs(List<Variable> inputs) {
     return getRuntimeInputs(executionResults.outcomes, inputs);
@@ -469,6 +475,23 @@ public class ExecutableSequence {
     throw new Error("Abnormal execution in sequence: " + this);
   }
 
+  public List<Object> getLastStmtValues() {
+	  List<Object> res = new ArrayList<>();
+	  int last = sequence.size() -1;
+	  Object[] objsAfterExec = getRuntimeInputs(last);
+	  for (int j = 0; j < objsAfterExec.length; j++) {
+		  Object curr = objsAfterExec[j];
+		  res.add(curr);
+	  }
+	  Statement stmt = sequence.getStatement(last);
+	  if (!stmt.getOutputType().isVoid()) {
+		  ExecutionOutcome statementResult = getResult(last);	
+		  Object retVal = ((NormalExecution)statementResult).getRuntimeValue();
+		  res.add(retVal);
+	  }
+	  return res;
+  }
+  
   /**
    * Returns the list of (reference type) values created and used by the last statement of this
    * sequence. Null output values are not included.
