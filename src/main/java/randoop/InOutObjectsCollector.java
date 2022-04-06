@@ -44,9 +44,8 @@ public final class InOutObjectsCollector implements ExecutionVisitor {
 
 	@Override
 	public void visitAfterStatement(ExecutableSequence sequence, int i) {
-		if (sequence.isNormalExecution() && i == sequence.sequence.size() - 1) {
+		if (i == sequence.sequence.size() - 1 && sequence.isNormalExecution()) 
 			outputs = sequence.getLastStmtValues();
-		}
 	}
 
 	@Override

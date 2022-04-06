@@ -27,6 +27,7 @@ public class InOutMethodSerializer implements IEventListener {
 	private InOutObjectsCollector inOutCollector;
 	private int inObjs = -1;
 	private int outObjs = -1;
+	private int tuplesGenerated = 0;
 	private boolean first = true;
 
 	public InOutMethodSerializer(XStream xstream, Pattern method, String outputFolder, InOutObjectsCollector inOutCollector) {
@@ -46,6 +47,10 @@ public class InOutMethodSerializer implements IEventListener {
 	public void explorationEnd() {
 		closeStream(inOoss);
 		closeStream(outOoss);
+		System.out.println(String.format(
+				"\nInOutMethodSerializer: Generated %d input/output tuples for %s method.", 
+				tuplesGenerated,
+				operation.toParsableString()));
 	}
 
 	@Override
@@ -55,7 +60,7 @@ public class InOutMethodSerializer implements IEventListener {
 
 	@Override
 	public void generationStepPost(ExecutableSequence s) {
-		if (s == null)
+		if (s == null || !s.isNormalExecution())
 			return;
 		
 		TypedOperation lastOp = s.sequence.getStatement(s.sequence.size() - 1).getOperation();
@@ -78,6 +83,7 @@ public class InOutMethodSerializer implements IEventListener {
 		else 
 			consistencyChecks(s, typedLastOp, inputs, outputs);
 
+		tuplesGenerated++;
 		writeObjects(inputs, inOoss);
 		writeObjects(outputs, outOoss);
 	}
