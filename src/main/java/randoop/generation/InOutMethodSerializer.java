@@ -87,17 +87,15 @@ public class InOutMethodSerializer implements IEventListener {
 		else 
 			consistencyChecks(s, typedLastOp, inputs, outputs);
 
-		writeObjectsCastingPrimitiveInputs(inputs, 
+		writeObjectsWideningPrimitiveInputs(inputs, 
 				inOoss, 
 				typedLastOp.getInputTypes(), 
 				typedLastOp.getOutputType());
-		writeObjectsCastingPrimitiveInputs(outputs, 
+		writeObjectsWideningPrimitiveInputs(outputs, 
 				outOoss, 
 				typedLastOp.getInputTypes(),
 				typedLastOp.getOutputType());
 		tuplesGenerated++;
-		//writeObjects(inputs, inOoss);
-		//writeObjects(outputs, outOoss);
 	}
 
 	private void consistencyChecks(ExecutableSequence s, TypedClassOperation typedLastOp, List<Object> inputs,
@@ -156,7 +154,7 @@ public class InOutMethodSerializer implements IEventListener {
 		}
 	}
 	
-	private void writeObjectsCastingPrimitiveInputs(List<Object> objs, List<ObjectOutputStream> loos, 
+	private void writeObjectsWideningPrimitiveInputs(List<Object> objs, List<ObjectOutputStream> loos, 
 			TypeTuple inTypes, Type outType) {
 		for (int k = 0; k < objs.size(); k++) {
 			Object currObj = objs.get(k);
@@ -170,7 +168,7 @@ public class InOutMethodSerializer implements IEventListener {
 			// so we need to convert ('widen') the values to the types defined in the method
 			// before serializing them
 			// Warning: We box all primitive values here
-			Object objWithMethodType = TypeConversions.convertPrimitiveValuesToType(currObj, type);
+			Object objWithMethodType = TypeConversions.widenPrimitiveValueToParameterType(currObj, type);
 			try {
 				currStream.writeObject(objWithMethodType);	
 			} catch (IOException e) {
@@ -195,11 +193,7 @@ public class InOutMethodSerializer implements IEventListener {
 
 class TypeConversions {
 	
-	private static <T> T boxPrimitiveValue(T t) {
-	    return t; 
-	}	
-	
-	public static Object convertPrimitiveValuesToType(Object obj, Type type) {
+	public static Object widenPrimitiveValueToParameterType(Object obj, Type type) {
 		if (obj == null) return obj;
 		
 		if (type.isPrimitive() || type.isBoxedPrimitive()) {
@@ -207,7 +201,6 @@ class TypeConversions {
 				PrimitiveType pType = (PrimitiveType) type;
 				type = pType.toBoxedPrimitive();
 			}
-			obj = boxPrimitiveValue(obj);
 			return makeWideningConversion(obj, type);
 		}
 		
@@ -230,62 +223,62 @@ class TypeConversions {
 		if (objClass.equals(Float.class)) {
 			Float b = (Float) obj;
 			if (typeClass.equals(Double.class))
-				return boxPrimitiveValue(b.doubleValue());	
+				return b.doubleValue();	
 		}
 		if (objClass.equals(Long.class)) {
 			Long b = (Long) obj;
 			if (typeClass.equals(Float.class))
-				return boxPrimitiveValue(b.floatValue());
+				return b.floatValue();
 			if (typeClass.equals(Double.class))
-				return boxPrimitiveValue(b.doubleValue());	
+				return b.doubleValue();	
 		}
 		if (objClass.equals(Integer.class)) {
 			Integer b = (Integer) obj;
 			if (typeClass.equals(Long.class))
-				return boxPrimitiveValue(b.longValue());
+				return b.longValue();
 			if (typeClass.equals(Float.class))
-				return boxPrimitiveValue(b.floatValue());
+				return b.floatValue();
 			if (typeClass.equals(Double.class))
-				return boxPrimitiveValue(b.doubleValue());	
+				return b.doubleValue();	
 		}
 		if (objClass.equals(Character.class)) {
 			Character b = (Character) obj;
 			if (typeClass.equals(Integer.class))
-				return boxPrimitiveValue(b - '0');
+				return b - '0';
 			if (typeClass.equals(Long.class))
-				return boxPrimitiveValue(new Long(b - '0'));
+				return new Long(b - '0');
 			if (typeClass.equals(Float.class))
-				return boxPrimitiveValue(new Float(b - '0'));
+				return new Float(b - '0');
 			if (typeClass.equals(Double.class))
-				return boxPrimitiveValue(new Double(b - '0'));		
+				return new Double(b - '0');		
 		}
 		if (objClass.equals(Short.class)) {
 			Short b = (Short) obj;
 			if (typeClass.equals(Character.class))
-				return boxPrimitiveValue(b.intValue() - '0');
+				return b.intValue() - '0';
 			if (typeClass.equals(Integer.class))
-				return boxPrimitiveValue(b.intValue());
+				return b.intValue();
 			if (typeClass.equals(Long.class))
-				return boxPrimitiveValue(b.longValue());
+				return b.longValue();
 			if (typeClass.equals(Float.class))
-				return boxPrimitiveValue(b.floatValue());
+				return b.floatValue();
 			if (typeClass.equals(Double.class))
-				return boxPrimitiveValue(b.doubleValue());	
+				return b.doubleValue();	
 		}
 		if (objClass.equals(Byte.class)) {
 			Byte b = (Byte) obj;
 			if (typeClass.equals(Short.class))
-				return boxPrimitiveValue(b.shortValue());
+				return b.shortValue();
 			if (typeClass.equals(Character.class))
-				return boxPrimitiveValue(b.intValue() - '0');
+				return b.intValue() - '0';
 			if (typeClass.equals(Integer.class))
-				return boxPrimitiveValue(b.intValue());
+				return b.intValue();
 			if (typeClass.equals(Long.class))
-				return boxPrimitiveValue(b.longValue());
+				return b.longValue();
 			if (typeClass.equals(Float.class))
-				return boxPrimitiveValue(b.floatValue());
+				return b.floatValue();
 			if (typeClass.equals(Double.class))
-				return boxPrimitiveValue(b.doubleValue());
+				return b.doubleValue();
 		}
 		
 		throw new Error(
