@@ -14,6 +14,9 @@ import randoop.operation.TypedClassOperation;
 import randoop.operation.TypedOperation;
 import randoop.reflection.SingleMethodMatcher;
 import randoop.sequence.ExecutableSequence;
+import randoop.types.PrimitiveType;
+import randoop.types.Type;
+import randoop.types.TypeTuple;
 
 public class InOutMethodSerializer implements IEventListener {
 
@@ -62,6 +65,7 @@ public class InOutMethodSerializer implements IEventListener {
 	public void generationStepPost(ExecutableSequence s) {
 		if (s == null || !s.isNormalExecution())
 			return;
+
 		
 		TypedOperation lastOp = s.sequence.getStatement(s.sequence.size() - 1).getOperation();
 		if (!(lastOp instanceof TypedClassOperation)) 
@@ -83,9 +87,17 @@ public class InOutMethodSerializer implements IEventListener {
 		else 
 			consistencyChecks(s, typedLastOp, inputs, outputs);
 
+		writeObjectsCastingPrimitiveInputs(inputs, 
+				inOoss, 
+				typedLastOp.getInputTypes(), 
+				typedLastOp.getOutputType());
+		writeObjectsCastingPrimitiveInputs(outputs, 
+				outOoss, 
+				typedLastOp.getInputTypes(),
+				typedLastOp.getOutputType());
 		tuplesGenerated++;
-		writeObjects(inputs, inOoss);
-		writeObjects(outputs, outOoss);
+		//writeObjects(inputs, inOoss);
+		//writeObjects(outputs, outOoss);
 	}
 
 	private void consistencyChecks(ExecutableSequence s, TypedClassOperation typedLastOp, List<Object> inputs,
@@ -144,6 +156,29 @@ public class InOutMethodSerializer implements IEventListener {
 		}
 	}
 	
+	private void writeObjectsCastingPrimitiveInputs(List<Object> objs, List<ObjectOutputStream> loos, 
+			TypeTuple inTypes, Type outType) {
+		for (int k = 0; k < objs.size(); k++) {
+			Object currObj = objs.get(k);
+			ObjectOutputStream currStream = loos.get(k);
+			Type type = null;
+			if (k < inTypes.size()) 
+				type = inTypes.get(k);
+			else
+				type = outType;
+			// Randoop might instantiate primitive parameters with values of different types
+			// so we need to convert ('widen') the values to the types defined in the method
+			// before serializing them
+			// Warning: We box all primitive values here
+			Object objWithMethodType = TypeConversions.convertPrimitiveValuesToType(currObj, type);
+			try {
+				currStream.writeObject(objWithMethodType);	
+			} catch (IOException e) {
+				throw new Error("Cannot serialize object: " + currObj.toString());
+			}
+		}
+	}
+	
 	private void closeStream(List<ObjectOutputStream> loos) {
 		for (ObjectOutputStream oos: loos) {
 			try {
@@ -154,5 +189,110 @@ public class InOutMethodSerializer implements IEventListener {
 		}
 	}
 	
+
+}
+
+
+class TypeConversions {
+	
+	private static <T> T boxPrimitiveValue(T t) {
+	    return t; 
+	}	
+	
+	public static Object convertPrimitiveValuesToType(Object obj, Type type) {
+		if (obj == null) return obj;
+		
+		if (type.isPrimitive() || type.isBoxedPrimitive()) {
+			if (type.isPrimitive()) {
+				PrimitiveType pType = (PrimitiveType) type;
+				type = pType.toBoxedPrimitive();
+			}
+			obj = boxPrimitiveValue(obj);
+			return makeWideningConversion(obj, type);
+		}
+		
+		return obj;
+	}
+
+	// Widening conversions:
+	//   byte -> short
+	//   short -> int
+	//   char -> int
+	//   int -> long
+	//   long -> float
+	//   float -> double
+	private static Object makeWideningConversion(Object obj, Type type) {
+		Class<?> objClass = obj.getClass();
+		Class<?> typeClass = type.getRuntimeClass();
+		if (objClass.equals(typeClass) || objClass.equals(Double.class))
+			return obj;
+		
+		if (objClass.equals(Float.class)) {
+			Float b = (Float) obj;
+			if (typeClass.equals(Double.class))
+				return boxPrimitiveValue(b.doubleValue());	
+		}
+		if (objClass.equals(Long.class)) {
+			Long b = (Long) obj;
+			if (typeClass.equals(Float.class))
+				return boxPrimitiveValue(b.floatValue());
+			if (typeClass.equals(Double.class))
+				return boxPrimitiveValue(b.doubleValue());	
+		}
+		if (objClass.equals(Integer.class)) {
+			Integer b = (Integer) obj;
+			if (typeClass.equals(Long.class))
+				return boxPrimitiveValue(b.longValue());
+			if (typeClass.equals(Float.class))
+				return boxPrimitiveValue(b.floatValue());
+			if (typeClass.equals(Double.class))
+				return boxPrimitiveValue(b.doubleValue());	
+		}
+		if (objClass.equals(Character.class)) {
+			Character b = (Character) obj;
+			if (typeClass.equals(Integer.class))
+				return boxPrimitiveValue(b - '0');
+			if (typeClass.equals(Long.class))
+				return boxPrimitiveValue(new Long(b - '0'));
+			if (typeClass.equals(Float.class))
+				return boxPrimitiveValue(new Float(b - '0'));
+			if (typeClass.equals(Double.class))
+				return boxPrimitiveValue(new Double(b - '0'));		
+		}
+		if (objClass.equals(Short.class)) {
+			Short b = (Short) obj;
+			if (typeClass.equals(Character.class))
+				return boxPrimitiveValue(b.intValue() - '0');
+			if (typeClass.equals(Integer.class))
+				return boxPrimitiveValue(b.intValue());
+			if (typeClass.equals(Long.class))
+				return boxPrimitiveValue(b.longValue());
+			if (typeClass.equals(Float.class))
+				return boxPrimitiveValue(b.floatValue());
+			if (typeClass.equals(Double.class))
+				return boxPrimitiveValue(b.doubleValue());	
+		}
+		if (objClass.equals(Byte.class)) {
+			Byte b = (Byte) obj;
+			if (typeClass.equals(Short.class))
+				return boxPrimitiveValue(b.shortValue());
+			if (typeClass.equals(Character.class))
+				return boxPrimitiveValue(b.intValue() - '0');
+			if (typeClass.equals(Integer.class))
+				return boxPrimitiveValue(b.intValue());
+			if (typeClass.equals(Long.class))
+				return boxPrimitiveValue(b.longValue());
+			if (typeClass.equals(Float.class))
+				return boxPrimitiveValue(b.floatValue());
+			if (typeClass.equals(Double.class))
+				return boxPrimitiveValue(b.doubleValue());
+		}
+		
+		throw new Error(
+				String.format("Widening failed: Could not convert value %s of type %s to type %s", 
+						obj.toString(),
+						objClass.getName(),
+						typeClass.getName()));
+	}
 
 }
