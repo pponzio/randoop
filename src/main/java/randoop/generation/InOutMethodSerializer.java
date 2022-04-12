@@ -223,62 +223,62 @@ class TypeConversions {
 		if (objClass.equals(Float.class)) {
 			Float b = (Float) obj;
 			if (typeClass.equals(Double.class))
-				return b.doubleValue();	
+				return (double) b.floatValue();		
 		}
 		if (objClass.equals(Long.class)) {
 			Long b = (Long) obj;
 			if (typeClass.equals(Float.class))
-				return b.floatValue();
+				return (float) b.longValue();
 			if (typeClass.equals(Double.class))
-				return b.doubleValue();	
+				return (double) b.longValue();	
 		}
 		if (objClass.equals(Integer.class)) {
 			Integer b = (Integer) obj;
 			if (typeClass.equals(Long.class))
-				return b.longValue();
+				return (long) b.intValue();
 			if (typeClass.equals(Float.class))
-				return b.floatValue();
+				return (float) b.intValue();
 			if (typeClass.equals(Double.class))
-				return b.doubleValue();	
+				return (double) b.intValue();	
 		}
 		if (objClass.equals(Character.class)) {
 			Character b = (Character) obj;
 			if (typeClass.equals(Integer.class))
-				return b - '0';
+				return (int) b.charValue();
 			if (typeClass.equals(Long.class))
-				return new Long(b - '0');
+				return (long) b.charValue();
 			if (typeClass.equals(Float.class))
-				return new Float(b - '0');
+				return (float) b.charValue();
 			if (typeClass.equals(Double.class))
-				return new Double(b - '0');		
+				return (double) b.charValue();		
 		}
 		if (objClass.equals(Short.class)) {
 			Short b = (Short) obj;
 			if (typeClass.equals(Character.class))
-				return b.intValue() - '0';
+				return (char) b.shortValue();
 			if (typeClass.equals(Integer.class))
-				return b.intValue();
+				return (int) b.shortValue();
 			if (typeClass.equals(Long.class))
-				return b.longValue();
+				return (long) b.shortValue();
 			if (typeClass.equals(Float.class))
-				return b.floatValue();
+				return (float) b.shortValue();
 			if (typeClass.equals(Double.class))
-				return b.doubleValue();	
+				return (double) b.shortValue();
 		}
 		if (objClass.equals(Byte.class)) {
 			Byte b = (Byte) obj;
 			if (typeClass.equals(Short.class))
-				return b.shortValue();
+				return (short) b.byteValue();
 			if (typeClass.equals(Character.class))
-				return b.intValue() - '0';
+				return (char) b.byteValue();
 			if (typeClass.equals(Integer.class))
-				return b.intValue();
+				return (int) b.byteValue();
 			if (typeClass.equals(Long.class))
-				return b.longValue();
+				return (long) b.byteValue();
 			if (typeClass.equals(Float.class))
-				return b.floatValue();
+				return (float) b.byteValue();
 			if (typeClass.equals(Double.class))
-				return b.doubleValue();
+				return (double) b.byteValue();
 		}
 		
 		throw new Error(
